@@ -12,7 +12,8 @@ const server = createServer(app);
 const io = new Server(server);
 const game = new Game();
 
-// TODO: Move this to a .env file, but dont care its free
+let playerUrls = [[],[]];
+
 const openai = new OpenAI({
     apiKey: process.env.OPEN_AI,
 });
@@ -34,8 +35,13 @@ const refreshPlayers = () => {
     io.emit('players', game.players);
 }
 
+const refreshPlayerUrls = () => {
+    io.emit('playersUrls', playerUrls);
+}
+
 const reset = () => {
     io.emit('reset');
+    playerUrls = [[],[]];
 }
 
 io.on('connection', socket => {
@@ -43,6 +49,7 @@ io.on('connection', socket => {
 
     socket.emit('reset');
     socket.emit('players', game.players);
+    socket.emit('playersUrls', playerUrls);
 
     socket.on('join', (playerNum, cb) => {
         const joined = game.join(socket.id, playerNum);
@@ -53,42 +60,31 @@ io.on('connection', socket => {
         }
     });
 
-    socket.on('ready', (imageData, cb) => {
+    socket.on('ready', ( playerNumClient, imageData, cb )=> {
+        imageData = imageData.replace(/^data:image\/\w+;base64,/, "");
+        const buffer = Buffer.from(imageData, "base64");
 
-        // TODO: inpaint image
-        // imageData = imageData.replace(/^data:image\/\w+;base64,/, "");
-        // const buffer = Buffer.from(imageData, "base64");
+        fs.writeFile(join(__dirname, `images/player${playerNumClient}.png`), buffer, null, err => {
+            if (err) {
+                console.error('writefile error', err);
+            }
 
-        // fs.writeFile(join(__dirname, 'images/player.png'), buffer, null, err => {
-        //     if (err) {
-        //         console.error('writefile error', err);
-        //     }
-
-        //     getSuperImages().then(imagesData => {
-        //         // console.log('imagesData', imagesData);
-
-        //         imagesData.forEach((imageData, index) => {
-        //             const superBuffer = Buffer.from(imageData.b64_json, "base64");
-
-        //             fs.writeFile(join(__dirname, `images/super${index}.png`), superBuffer, null, err => {
-        //                 if (err) {
-        //                     console.error('super writefile error', err);
-        //                 }
-
-        //                 console.log('super image saved');
-        //             });
-        //         });
-        //     }).catch(error => {
-        //         console.log('getSuperImages error', error);
-        //     })
-        // });
-
-        const playerNum = game.ready(socket.id);
-
-        if (playerNum !== false) {
-            cb(playerNum);
-            refreshPlayers();
-        }
+            getImageVariations(playerNumClient).then(imagesData => {
+                const imageUrls = imagesData.map(imagesDatum => imagesDatum.url);
+                const playerNum = game.ready(socket.id);
+    
+                if (playerNum !== false) {
+                    cb(playerNum);
+                    playerUrls[playerNum] = imageUrls;
+                    refreshPlayers();
+                    refreshPlayerUrls();
+                } else {
+                    cb(false);
+                }
+            }).catch(error => {
+                console.log('getImageVariations error', error);
+            })
+        });
     });
 
     socket.on('tak', () => {
@@ -110,15 +106,14 @@ io.on('connection', socket => {
     })
 });
 
-async function getSuperImages() {
-    const images = await openai.images.edit({
-        image: fs.createReadStream('images/player.png'),
-        mask: fs.createReadStream('images/mask.png'),
-        prompt: "Anime style. Make the person super. Dont change the background",
-        n: 2,
+async function getImageVariations(playerNumClient) {
+    const images = await openai.images.createVariation({
+        image: fs.createReadStream(`images/player${playerNumClient}.png`),
+        // n: 2,
+        n: 1,
         size: "512x512",
-        response_format: "b64_json",
-        model: 'dall-e-2'
+        // response_format: "b64_json", // use url
+        // model: 'dall-e-2' // use default
     });
 
     return images.data;

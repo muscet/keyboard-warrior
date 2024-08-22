@@ -3,20 +3,24 @@
 <div id="main">
     <div id="countdown"></div>
     <div id="player1" class="player">
+        <div class="loader"></div>
         <button class="join button" onclick="join(0)">Join</button>
         <button class="ready button" onclick="ready(0)">Ready</button>
         <div id="chakra1" class="chakra">0</div>
         <video src="" id="video1" autoplay></video>
-        <canvas id="canvas1" width="400" height="300"></canvas>
-        <div class="images">
+        <canvas id="canvas1" width="300" height="300"></canvas>
+        <div id="images1" class="images">
             <img src="/images/unlocked-player.png" alt="" class="default">
         </div>
     </div>
     <div id="player2" class="player">
+        <div class="loader"></div>
         <button class="join button" onclick="join(1)">Join</button>
         <button class="ready button" onclick="ready(1)">Ready</button>
         <div id="chakra2" class="chakra">0</div>
-        <div class="images">
+        <video src="" id="video2" autoplay></video>
+        <canvas id="canvas2" width="300" height="300"></canvas>
+        <div id="images2" class="images">
             <img src="/images/unlocked-player.png" alt="" class="default">
         </div>
     </div>

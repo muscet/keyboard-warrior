@@ -3,9 +3,9 @@ export class Game {
     started = false;
     players = [];
     cb = null;
-    target = 400
-    minTarget = 200
-    winThreshold = 100
+    target = 200
+    minTarget = 100
+    winThreshold = 50
     images = [[], []]
 
     get hasTwoPlayers() {
