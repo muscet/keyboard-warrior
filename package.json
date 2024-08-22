@@ -1,0 +1,22 @@
+{
+  "name": "keyboard-warrior",
+  "version": "1.0.0",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.playngo.com/users/michael.natividad_playngo.com/repos/keyboard-warrior/browse"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "express": "^4.19.2",
+    "openai": "^4.56.0",
+    "socket.io": "^4.7.5"
+  }
+}
