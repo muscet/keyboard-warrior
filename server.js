@@ -14,7 +14,7 @@ const game = new Game();
 
 // TODO: Move this to a .env file, but dont care its free
 const openai = new OpenAI({
-    apiKey: "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",
+    apiKey: process.env.OPEN_AI,
 });
 
 game.listen((...args) => {
